@@ -1,5 +1,5 @@
 # Capstone-Group-4
-Aryan Zodge, Benjamin Combs. Isabella Recine, Kaitlyn Borski
+Aryan Zodge, Benjamin Combs, Isabella Recine, Kaitlyn Borski
 
 ### Overview
 In this capstone project, you will work with High Volume For-Hire Vehicle (HVFHV) data, Yellow Taxi Data, and Green Taxi Data. Your objective is to extract this data from AWS S3 (Raw), perform necessary transformations, and load it into a Conformed S3 bucket, and finally into a Transformed S3 bucket before importing it into Snowflake for final analysis using Tableau or Thoughtspot. You will leverage various AWS services and tools, including AWS Lambda, Python/Jupyter Notebook, Databricks/PySpark, AWS Glue Studio or AWS Glue Databrew, AWS Glue Crawler and Catalog, AWS Athena, Snowflake, and Tableau.
