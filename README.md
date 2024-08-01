@@ -20,3 +20,10 @@ You will work with the provided datasets, which include data dictionary files an
 **Business Benefits**
 - Increased revenue with dynamic pricing and driver allocation
 - Increased customer satisfaction?
+
+```
+Crash Data Source: s3://ben-raw-bucket/Motor_Vehicle_Collisions_-_Crashes_20240731.csv
+```
+```
+Taxi Zone Lookup: s3://ben-raw-bucket/taxi_zone_lookup.csv
+```
