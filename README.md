@@ -23,9 +23,9 @@ You will work with the provided datasets, which include data dictionary files an
 
 #### Crash Data Source: 
 ```
-s3://ben-raw-bucket/Motor_Vehicle_Collisions_-_Crashes_20240731.csv
+s3://capstone-techcatalyst-raw/group_4_other/Motor_Vehicle_Collisions_-_Crashes_20240731.csv
 ```
 #### Taxi Zone Lookup:
 ```
-s3://ben-raw-bucket/taxi_zone_lookup.csv
+s3://capstone-techcatalyst-raw/other/taxi_zone_lookup.csv
 ```
