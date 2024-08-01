@@ -8,7 +8,7 @@ Before beginning the project, you must select a specific use-case to focus on. Y
 
 You will work with the provided datasets, which include data dictionary files and additional lookup tables. Additionally, you are encouraged to incorporate other data sources to enrich the existing data, thereby enhancing your analysis and providing deeper insights. This project is designed to be case study-driven, allowing you to explore real-world scenarios and solve tangible problems using data engineering techniques.
 
-### Use Case
+### Use Cases
 **Optimizing Fleet Management and Safety**
  - Improve safety and efficiency by analyzing taxi demand locations and accident hotspots.
  
