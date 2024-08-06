@@ -1,0 +1,21 @@
+create or replace view CAPSTONE_DE.GROUP_4.VEHICLE_ACCIDENT_RANKED_VW(
+	BOROUGH,
+	VEHICLE_TYPE_CODE_1,
+	TOTAL_ACCIDENTS,
+	RANK
+) as (
+    WITH ranked_accident AS(
+        SELECT BOROUGH, 
+               VEHICLE_TYPE_CODE_1, 
+               COUNT(*) TOTAL_ACCIDENTS,
+               RANK() OVER (PARTITION BY BOROUGH ORDER BY TOTAL_ACCIDENTS DESC) AS RANK
+        FROM CAPSTONE_DE.GROUP_4.ACCIDENT_DATA
+        GROUP BY BOROUGH, VEHICLE_TYPE_CODE_1
+    )
+    SELECT BOROUGH,
+           VEHICLE_TYPE_CODE_1, 
+           TOTAL_ACCIDENTS,
+           RANK
+    FROM ranked_accident
+    WHERE rank <= 5
+);
