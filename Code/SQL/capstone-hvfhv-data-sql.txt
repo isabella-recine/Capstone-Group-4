@@ -1,0 +1,205 @@
+USE ROLE de;
+USE WAREHOUSE COMPUTE_WH;
+USE DATABASE CAPSTONE_DE;
+USE SCHEMA EXTERNAL_STAGE;
+
+--###########################################STAGES############################################################
+
+CREATE OR REPLACE STAGE CAPSTONE_DE.EXTERNAL_STAGE.GROUP4_CAPSTONE_HVFHV_DATA_AWS_STAGE
+        --STORAGE_INTEGRATION = s3_int
+        URL='s3://capstone-techcatalyst-transformed/group4/hvfhv_data/'
+        CREDENTIALS=(AWS_KEY_ID='' AWS_SECRET_KEY='')
+        FILE_FORMAT=(TYPE='PARQUET');
+
+list @GROUP4_CAPSTONE_HVFHV_DATA_AWS_STAGE;
+
+SELECT *
+FROM @GROUP4_CAPSTONE_HVFHV_DATA_AWS_STAGE/year=2024/month=01/day_of_month=13/part-00091-tid-8636741825732723846-47095ac8-2387-4078-a394-c7804861c46a-92-1.c000.snappy.parquet;
+
+CREATE OR REPLACE FILE FORMAT parquet_format
+TYPE = 'PARQUET';
+
+--###########################################TABLES############################################################
+
+CREATE OR REPLACE TABLE CAPSTONE_DE.GROUP_4.HVFHS_STAGING AS
+SELECT
+    $1:DOLocationID::INTEGER AS DOLocationID,
+    $1:PULocationID::INTEGER AS PULocationID,
+    $1:access_a_ride_flag::STRING AS access_a_ride_flag,
+    $1:airport_fee::FLOAT AS airport_fee,
+    $1:base_passenger_fare::FLOAT AS base_passenger_fare,
+    $1:bcf::FLOAT AS bcf,
+    $1:congestion_surcharge::FLOAT AS congestion_surcharge,
+    $1:date::STRING AS date,
+    $1:day_of_month::INTEGER AS day_of_month,
+    $1:day_of_week::STRING AS day_of_week,
+    $1:dispatching_base_num::STRING AS dispatching_base_num,
+    $1:driver_pay::FLOAT AS driver_pay,
+    $1:dropoff_datetime::TIMESTAMP_NTZ AS dropoff_datetime,
+    $1:hvfhs_license_num::STRING AS hvfhs_license_num,
+    $1:is_weekend::BOOLEAN AS is_weekend,
+    $1:on_scene_datetime::TIMESTAMP_NTZ AS on_scene_datetime,
+    $1:originating_base_num::STRING AS originating_base_num,
+    $1:pickup_datetime::TIMESTAMP_NTZ AS pickup_datetime,
+    $1:pickup_wait_time::FLOAT AS pickup_wait_time,
+    $1:request_datetime::TIMESTAMP_NTZ AS request_datetime,
+    $1:sales_tax::FLOAT AS sales_tax,
+    $1:shared_match_flag::STRING AS shared_match_flag,
+    $1:shared_request_flag::STRING AS shared_request_flag,
+    $1:tips::FLOAT AS tips,
+    $1:tolls::FLOAT AS tolls,
+    $1:trip_duration::FLOAT AS trip_duration,
+    $1:trip_miles::FLOAT AS trip_miles,
+    $1:trip_time::INTEGER AS trip_time,
+    $1:wav_match_flag::STRING AS wav_match_flag,
+    $1:wav_request_flag::STRING AS wav_request_flag,
+    METADATA$FILENAME AS source_filename
+FROM @GROUP4_CAPSTONE_HVFHV_DATA_AWS_STAGE
+(FILE_FORMAT => 'parquet_format', PATTERN => '.*parquet.*');
+
+SELECT *
+FROM CAPSTONE_DE.GROUP_4.HVFHS_STAGING
+LIMIT 10;
+
+
+DOLocationID,
+PULocationID,
+access_a_ride_flag,
+airport_fee,
+base_passenger_fare,
+bcf,
+congestion_surcharge,
+date,
+day_of_month,
+day_of_week,
+dispatching_base_num,
+driver_pay,
+dropoff_datetime,
+hvfhs_license_num,
+is_weekend,
+on_scene_datetime,
+originating_base_num,
+pickup_datetime,
+pickup_wait_time,
+request_datetime,
+sales_tax,
+shared_match_flag,
+tips,
+tolls,
+trip_duration,
+trip_miles,
+trip_time,
+wav_match_flag,
+wav_request_flag,
+partition_year,
+partition_month;
+
+
+
+CREATE OR REPLACE TABLE CAPSTONE_DE.GROUP_4.HVFHS_DATA (
+    DOLocationID INTEGER,
+    PULocationID INTEGER,
+    access_a_ride_flag STRING,
+    airport_fee FLOAT,
+    base_passenger_fare FLOAT,
+    bcf FLOAT,
+    congestion_surcharge FLOAT,
+    date STRING,
+    day_of_month INTEGER,
+    day_of_week STRING,
+    dispatching_base_num STRING,
+    driver_pay FLOAT,
+    dropoff_datetime TIMESTAMP_NTZ,
+    hvfhs_license_num STRING,
+    is_weekend BOOLEAN,
+    on_scene_datetime TIMESTAMP_NTZ,
+    originating_base_num STRING,
+    pickup_datetime TIMESTAMP_NTZ,
+    pickup_wait_time FLOAT,
+    request_datetime TIMESTAMP_NTZ,
+    sales_tax FLOAT,
+    shared_match_flag STRING,
+    tips FLOAT,
+    tolls FLOAT,
+    trip_duration FLOAT,
+    trip_miles FLOAT,
+    trip_time FLOAT,
+    wav_match_flag STRING,
+    wav_request_flag STRING,
+    partition_year STRING,
+    partition_month STRING
+);
+
+INSERT INTO CAPSTONE_DE.GROUP_4.HVFHS_DATA (
+    DOLocationID,
+    PULocationID,
+    access_a_ride_flag,
+    airport_fee,
+    base_passenger_fare,
+    bcf,
+    congestion_surcharge,
+    date,
+    day_of_month,
+    day_of_week,
+    dispatching_base_num,
+    driver_pay,
+    dropoff_datetime,
+    hvfhs_license_num,
+    is_weekend,
+    on_scene_datetime,
+    originating_base_num,
+    pickup_datetime,
+    pickup_wait_time,
+    request_datetime,
+    sales_tax,
+    shared_match_flag,
+    tips,
+    tolls,
+    trip_duration,
+    trip_miles,
+    trip_time,
+    wav_match_flag,
+    wav_request_flag,
+    partition_year,
+    partition_month
+)
+SELECT
+    DOLocationID,
+    PULocationID,
+    access_a_ride_flag,
+    airport_fee,
+    base_passenger_fare,
+    bcf,
+    congestion_surcharge,
+    date,
+    day_of_month,
+    day_of_week,
+    dispatching_base_num,
+    driver_pay,
+    dropoff_datetime,
+    hvfhs_license_num,
+    is_weekend,
+    on_scene_datetime,
+    originating_base_num,
+    pickup_datetime,
+    pickup_wait_time,
+    request_datetime,
+    sales_tax,
+    shared_match_flag,
+    tips,
+    tolls,
+    trip_duration,
+    trip_miles,
+    trip_time,
+    wav_match_flag,
+    wav_request_flag,
+    REGEXP_SUBSTR(source_filename, 'year=(\\d{4})') AS PARTITION_YEAR,
+    REGEXP_SUBSTR(source_filename, 'month=(\\d{2})') AS PARTITION_MONTH 
+FROM CAPSTONE_DE.GROUP_4.HVFHS_STAGING;
+
+SELECT DISTINCT PARTITION_MONTH
+FROM CAPSTONE_DE.GROUP_4.HVFHS_DATA;
+
+SELECT *
+FROM CAPSTONE_DE.GROUP_4.HVFHS_DATA
+LIMIT 10;

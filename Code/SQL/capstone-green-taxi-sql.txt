@@ -1,0 +1,196 @@
+USE ROLE de;
+USE WAREHOUSE COMPUTE_WH;
+USE DATABASE CAPSTONE_DE;
+USE SCHEMA EXTERNAL_STAGE;
+
+--###########################################STAGES############################################################
+
+CREATE OR REPLACE STAGE CAPSTONE_DE.EXTERNAL_STAGE.GROUP4_CAPSTONE_GREEN_TAXI_AWS_STAGE
+        --STORAGE_INTEGRATION = s3_int
+        URL='s3://capstone-techcatalyst-transformed/group4/taxi_data/taxi_type_=Green'
+        CREDENTIALS=(AWS_KEY_ID='' AWS_SECRET_KEY='')
+        FILE_FORMAT=(TYPE='PARQUET');
+
+list @GROUP4_CAPSTONE_GREEN_TAXI_AWS_STAGE;
+
+SELECT *
+FROM @GROUP4_CAPSTONE_GREEN_TAXI_AWS_STAGE/year_=2023/month_=09/part-00000-tid-1195238506584138532-92de2e63-a50e-4bed-8694-716c2fa58201-383-1.c000.snappy.parquet
+(FILE_FORMAT => 'parquet_format');
+
+CREATE OR REPLACE TABLE CAPSTONE_DE.GROUP_4.GREEN_TAXI_STAGING AS
+SELECT
+    $1:Airport_fee::FLOAT AS Airport_fee,
+    $1:DOLocationID::INTEGER AS DOLocationID,
+    $1:PULocationID::INTEGER AS PULocationID,
+    $1:RatecodeID::FLOAT AS RatecodeID,
+    $1:Taxi_Type::STRING AS Taxi_Type,
+    $1:VendorID::INTEGER AS VendorID,
+    $1:congestion_surcharge::FLOAT AS congestion_surcharge,
+    $1:date::STRING AS date,
+    $1:day_of_month::INTEGER AS day_of_month,
+    $1:day_of_week::STRING AS day_of_week,
+    $1:dropoff_datetime::TIMESTAMP_NTZ AS dropoff_datetime,
+    $1:extra::FLOAT AS extra,
+    $1:fare_amount::FLOAT AS fare_amount,
+    $1:improvement_surcharge::FLOAT AS improvement_surcharge,
+    $1:is_weekend::BOOLEAN AS is_weekend,
+    $1:month::INTEGER AS month,
+    $1:mta_tax::FLOAT AS mta_tax,
+    $1:passenger_count::INTEGER AS passenger_count,
+    $1:payment_type::FLOAT AS payment_type,
+    $1:pickup_datetime::TIMESTAMP_NTZ AS pickup_datetime,
+    $1:store_and_fwd_flag::STRING AS store_and_fwd_flag,
+    $1:tip_amount::FLOAT AS tip_amount,
+    $1:tolls_amount::FLOAT AS tolls_amount,
+    $1:total_amount::FLOAT AS total_amount,
+    $1:trip_distance::FLOAT AS trip_distance,
+    $1:trip_distance_percentage::FLOAT AS trip_distance_percentage,
+    $1:trip_duration::FLOAT AS trip_duration,
+    $1:trip_duration_percentage::FLOAT AS trip_duration_percentage,
+    $1:year::INTEGER AS year,
+    METADATA$FILENAME AS source_filename
+    FROM @GROUP4_CAPSTONE_GREEN_TAXI_AWS_STAGE
+    (FILE_FORMAT => 'parquet_format', PATTERN => '.*parquet.*');
+
+SELECT *
+FROM CAPSTONE_DE.GROUP_4.GREEN_TAXI_STAGING
+LIMIT 10;
+
+
+
+CREATE OR REPLACE TABLE CAPSTONE_DE.GROUP_4.GREEN_TAXI_DATA (
+    VendorID INTEGER,
+    pickup_datetime TIMESTAMP_NTZ,
+    dropoff_datetime TIMESTAMP_NTZ,
+    passenger_count INTEGER,
+    trip_distance FLOAT,
+    RatecodeID FLOAT,
+    store_and_fwd_flag STRING,
+    PULocationID INTEGER,
+    DOLocationID INTEGER,
+    payment_type FLOAT,
+    fare_amount FLOAT,
+    extra FLOAT,
+    mta_tax FLOAT,
+    tip_amount FLOAT,
+    tolls_amount FLOAT,
+    improvement_surcharge FLOAT,
+    total_amount FLOAT,
+    congestion_surcharge FLOAT,
+    Airport_fee FLOAT,
+    Taxi_Type STRING,
+    date STRING,
+    year INTEGER,
+    month INTEGER,
+    day_of_month INTEGER,
+    day_of_week STRING,
+    is_weekend BOOLEAN,
+    trip_duration FLOAT,
+    trip_distance_percentage FLOAT,
+    trip_duration_percentage FLOAT,
+    partition_year STRING,
+    partition_month STRING
+);
+
+
+INSERT INTO CAPSTONE_DE.GROUP_4.GREEN_TAXI_DATA (
+    Airport_fee,
+    DOLocationID,
+    PULocationID,
+    RatecodeID,
+    Taxi_Type,
+    VendorID,
+    congestion_surcharge,
+    date,
+    day_of_month,
+    day_of_week,
+    dropoff_datetime,
+    extra,
+    fare_amount,
+    improvement_surcharge,
+    is_weekend,
+    month,
+    mta_tax,
+    passenger_count,
+    payment_type,
+    pickup_datetime,
+    store_and_fwd_flag,
+    tip_amount,
+    tolls_amount,
+    total_amount,
+    trip_distance,
+    trip_distance_percentage,
+    trip_duration,
+    trip_duration_percentage,
+    year,
+    partition_year,
+    partition_month
+)
+SELECT 
+    Airport_fee,
+    DOLocationID,
+    PULocationID,
+    RatecodeID,
+    Taxi_Type,
+    VendorID,
+    congestion_surcharge,
+    date,
+    day_of_month,
+    day_of_week,
+    dropoff_datetime,
+    extra,
+    fare_amount,
+    improvement_surcharge,
+    is_weekend,
+    month,
+    mta_tax,
+    passenger_count,
+    payment_type,
+    pickup_datetime,
+    store_and_fwd_flag,
+    tip_amount,
+    tolls_amount,
+    total_amount,
+    trip_distance,
+    trip_distance_percentage,
+    trip_duration,
+    trip_duration_percentage,
+    year,
+    REGEXP_SUBSTR(source_filename, 'year_=(\\d{4})') AS PARTITION_YEAR,
+    REGEXP_SUBSTR(source_filename, 'month_=(\\d{2})') AS PARTITION_MONTH 
+FROM CAPSTONE_DE.GROUP_4.GREEN_TAXI_STAGING;
+
+SELECT *
+FROM CAPSTONE_DE.GROUP_4.GREEN_TAXI_DATA
+LIMIT 10;
+
+SELECT LOCATIONID
+FROM CAPSTONE_DE.GROUP_4.ZONE_TAXI_DATA
+ORDER BY LOCATIONID DESC
+LIMIT 10;
+
+
+--What are the most common pickup and dropoff locations?
+-- pickups
+SELECT z.BOROUGH, COUNT(g.PULOCATIONID) NUM_OF_PICKUPS
+FROM CAPSTONE_DE.GROUP_4.GREEN_TAXI_DATA g
+JOIN CAPSTONE_DE.GROUP_4.ZONE_TAXI_DATA z
+ON z.LOCATIONID = g.pulocationid
+GROUP BY z.BOROUGH
+ORDER BY NUM_OF_PICKUPS DESC;
+
+-- dropoffs
+SELECT z.BOROUGH, COUNT(g.DOLOCATIONID) NUM_OF_DROPOFFS
+FROM CAPSTONE_DE.GROUP_4.GREEN_TAXI_DATA g
+JOIN CAPSTONE_DE.GROUP_4.ZONE_TAXI_DATA z
+ON z.LOCATIONID = g.dolocationid
+GROUP BY z.BOROUGH
+ORDER BY NUM_OF_DROPOFFS DESC;
+
+
+--query
+SELECT
+       --the distances travled per borough
+       -- which borough gets the most tips
+       -- which day, month and day of week does the borugh get the most trips
+       
